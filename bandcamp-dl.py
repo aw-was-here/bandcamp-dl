@@ -190,8 +190,12 @@ def already_downloaded(item):
         # get the track count and compare against the item's streamable tracks
         # count. if the former is less than the latter, delete and redownload.
         if g[0].rsplit(".", 1)[1] == "zip":
-            with zipfile.ZipFile(g[0]) as z:
-                count = len(list(filter(is_track, z.namelist())))
+            try:
+                with zipfile.ZipFile(g[0]) as z:
+                    count = len(list(filter(is_track, z.namelist())))
+            except Exception as err:
+                logging.error("%s is probably not a zip file (%s), redownloading.", g[0], err)
+                return False
             if item.tracks > count:
                 logging.info(
                     "remove %s (%s tracks, now has %s)", g[0], count, item.tracks
